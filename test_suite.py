@@ -1,18 +1,8 @@
 import sys
 import os
 import unittest
+import importlib
 import qgis  # NOQA  For SIP API to V2 if run outside of QGIS
-
-try:
-    from pip import main as pipmain
-except ImportError:
-    from pip._internal import main as pipmain
-
-try:
-    import coverage
-except ImportError:
-    pipmain(['install', 'coverage'])
-    import coverage
 import tempfile
 from osgeo import gdal
 from qgis.PyQt import Qt
@@ -34,7 +24,15 @@ def _run_tests(test_suite, package_name, with_coverage=False):
     print('QT : %s' % Qt.QT_VERSION_STR)
     print('Run slow tests : %s' % (not os.environ.get('ON_TRAVIS', False)))
     print('########')
+    cov = None
     if with_coverage:
+        try:
+            coverage = importlib.import_module('coverage')
+        except ImportError as exc:
+            raise RuntimeError(
+                'Coverage requested but package "coverage" is not installed. '
+                'Install it before running with_coverage=True.'
+            ) from exc
         cov = coverage.Coverage(
             source=['./'],
             omit=['*/test/*', './definitions/*'],
