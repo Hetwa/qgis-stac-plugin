@@ -22,7 +22,7 @@ do
     sleep 10
     docker compose exec -T qgis-testing-environment sh -c "pip3 install --break-system-packages flask"
 
-    docker compose exec -T qgis-testing-environment qgis_testrunner.sh test_suite.test_package
+    docker compose exec -T qgis-testing-environment sh -c "PYTHONUNBUFFERED=1 python3 -c 'import test_suite; test_suite.test_package()'"
     docker compose down
 
 done
