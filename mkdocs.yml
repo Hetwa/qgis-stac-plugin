@@ -8,7 +8,7 @@ site_description: QGIS STAC API Browser
 site_author: Kartoza
 
 nav:
-  - Home: 'index.md'
+  - Home: "index.md"
   - Installation: "installation.md"
   - User Guide: "user-guide.md"
   - Development: "development.md"
@@ -34,15 +34,15 @@ theme:
   name: material
   custom_dir: docs
   palette:
-  - scheme: stac
-    toggle:
+    - scheme: stac
+      toggle:
         icon: material/toggle-switch-off-outline
         name: Switch to dark mode
-  - scheme: slate
-    toggle:
-          icon: material/toggle-switch
-          name: Switch to light mode
-    accent: cyan
+    - scheme: slate
+      toggle:
+        icon: material/toggle-switch
+        name: Switch to light mode
+      accent: cyan
   logo: assets/logo.png
   favicon: assets/favicon.png
   features:
