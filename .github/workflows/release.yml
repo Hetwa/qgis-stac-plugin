@@ -4,6 +4,9 @@ on:
     tags:
       - "v*"
 
+permissions:
+  contents: write
+
 jobs:
   create-release:
     runs-on: ubuntu-22.04
@@ -25,38 +28,25 @@ jobs:
       - name: Get experimental info
         id: get-experimental
         run: |
-          echo "::set-output name=IS_EXPERIMENTAL::$(poetry run python -c "import toml; data=toml.load('pyproject.toml'); print(data['tool']['qgis-plugin']['metadata']['experimental'].lower())")"
-
-      - name: Create release from tag
-        id: create-release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: ${{ github.ref }}
-          release_name: Release ${{ github.ref }}
-          prerelease: ${{ steps.get-experimental.outputs.IS_EXPERIMENTAL }}
-          draft: false
+          is_experimental=$(poetry run python - <<'PY'
+          import toml
+          data = toml.load("pyproject.toml")
+          print(data["tool"]["qgis-plugin"]["metadata"]["experimental"].lower())
+          PY
+          )
+          echo "IS_EXPERIMENTAL=${is_experimental}" >> "$GITHUB_OUTPUT"
 
       - name: Generate zip
         run: poetry run python admin.py generate-zip
 
-      - name: get zip details
-        id: get-zip-details
-        run: |
-          echo "::set-output name=ZIP_PATH::dist/$(ls dist)\n"
-          echo "::set-output name=ZIP_NAME::$(ls dist)"
-
-      - name: Upload release asset
-        id: upload-release-asset
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Create release from tag and upload zip
+        uses: softprops/action-gh-release@v2
         with:
-          upload_url: ${{ steps.create-release.outputs.upload_url}}
-          asset_path: ${{ steps.get-zip-details.outputs.ZIP_PATH}}
-          asset_name: ${{ steps.get-zip-details.outputs.ZIP_NAME}}
-          asset_content_type: application/zip
+          tag_name: ${{ github.ref_name }}
+          name: Release ${{ github.ref_name }}
+          draft: false
+          prerelease: ${{ steps.get-experimental.outputs.IS_EXPERIMENTAL == 'true' }}
+          files: dist/*.zip
 
       - name: Generate plugin repo XML
         run: poetry run python admin.py --verbose generate-plugin-repo-xml
