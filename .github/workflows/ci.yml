@@ -28,10 +28,12 @@ jobs:
       fail-fast: false
       matrix:
         qgis_version_tag:
-          - release-3_16
-          - release-3_22
-          - release-3_34
-          - release-3_36
+          # - release-3_16
+          # - release-3_22
+          # - release-3_34
+          # - release-3_36
+          - release-3_40
+          - release-3_44
 
     steps:
       - name: Checkout
